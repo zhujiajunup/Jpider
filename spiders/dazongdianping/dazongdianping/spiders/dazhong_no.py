@@ -199,8 +199,6 @@ class Dazhong:
                 print(rsp)
 
 
-
-
     def start2(self):
         opener = self.make_my_opener()
         for url in self.start_urls:
@@ -215,8 +213,6 @@ class Dazhong:
                 rsp = opener.open(url % i)
 
                 html_tree = etree.HTML(rsp.read().decode('utf-8'))
-
-
 
                 shops_li = html_tree.xpath('//div[@id="shop-all-list"]/ul/li')
 
@@ -331,7 +327,7 @@ class Dazhong:
 
         # shopCityId:(.*?),(.*?)cityId:(.*?),(.*?)power:(.*?), (.*?)shopType:(.*?),(.*?)mainCategoryId:(.*?),(.*)')
         info_pattern = re.compile(
-            r'{(.*?)shopCityId:(\d),(.*?)cityId:(\d),(.*?)power:(\d)(.*)shopType:(\d)(.*)mainCategoryId:(\d)(.*)')
+            r'{(.*?)shopCityId:(\d)(.*?)cityId:(\d)(.*?)power:(\d)(.*)shopType:(\d)(.*)mainCategoryId:(\d)(.*)')
         # http://www.dianping.com/ajax/json/shopDynamic/searchPromo?shopId=10334671&power=5&cityId=1&shopType=10
 
 
@@ -358,9 +354,10 @@ class Dazhong:
                     result = shop_config_pattern.findall(content)
 
                     if result != []:
-
+                        print(result)
                         info = info_pattern.findall(result[0])
                         if info != []:
+                            print('---')
                             info = info[0]
                             feature_url = self.spec_pattern % (row[0], info[5], info[3], info[7])
                             # http://www.dianping.com/ajax/json/shopDynamic/reviewAndStar?shopId=10334671&cityId=1&mainCategoryId=205
