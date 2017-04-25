@@ -1,0 +1,196 @@
+2017-04-21 07:15:48 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/14730301/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:15:49 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/15856755/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:15:51 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/16205290/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:15:53 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/16971406/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:15:55 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/16984895/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:15:56 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/17166161/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:15:58 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/17204795/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:15:59 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/17650030/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:01 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/17710077/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:03 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/17942312/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:05 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/18130996/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:07 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/18398909/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:08 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/18523361/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:10 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/1897957/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:12 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/1939924/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:14 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/19421993/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:15 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/19465224/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:17 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/1953979/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:19 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/19700161/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:20 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/19781037/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:22 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/1995847/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:24 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/2002618/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:26 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/2010655/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:27 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/2014039/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:29 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/2032444/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:31 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/2060737/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:32 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/20631326/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
+2017-04-21 07:16:33 [scrapy.core.scraper] ERROR: Spider error processing <GET http://www.dianping.com/shop/20880592/review_more_newest> (referer: None)
+Traceback (most recent call last):
+  File "/opt/anaconda/lib/python3.6/site-packages/twisted/internet/defer.py", line 653, in _runCallbacks
+    current.result = callback(current.result, *args, **kw)
+  File "/opt/anaconda/lib/python3.6/site-packages/scrapy/spiders/__init__.py", line 76, in parse
+    raise NotImplementedError
+NotImplementedError
