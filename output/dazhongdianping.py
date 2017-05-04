@@ -58,11 +58,12 @@ for i in range(len(title)):
 
 shops = ShopInfo.objects.all()
 
+result_dic = {}
 
 for j in range(1, len(shops)+1):
     shop = shops[j-1]
     info_list = []
-    info_list.append(shop.shop_id) # id
+    info_list.append(str(shop.shop_id)) # id
     print(shop.shop_id)
     try:
         url = ShopId.objects.get(pk=shop.shop_id).from_url
@@ -83,9 +84,21 @@ for j in range(1, len(shops)+1):
         avg_price = avg_price[:-1]
 
     info_list.append(avg_price )
-
-    info_list.append(shop.feature2)
-    info_list.append(shop.open_time.replace('\t', ' ').replace('\n', ';') if shop.open_time is not None else '')
+    features = shop.feature2.split(';')
+    print(features)
+    f_l = []
+    for f in features:
+        if f == 'huo':
+            print('活动')
+            f_l.append('活动')
+        elif f == 'ka':
+            print('会员卡')
+            f_l.append('会员卡')
+        else:
+            f_l.append(f)
+    info_list.append(';'.join(f_l))
+    f_l.clear()
+    info_list.append(shop.open_time.replace('\t', ' ').replace('\r','').replace('\n', ';') if shop.open_time is not None else '')
     info_list.append(shop.review_count[:-3])
     info_list.append(rank_star_dict[shop.rank_star])
     info_list.append(shop.taste.split('：')[1])
@@ -98,7 +111,15 @@ for j in range(1, len(shops)+1):
     info_list.append(review.star_3)
     info_list.append(review.star_2)
     info_list.append(review.star_1)
-    info_list.append(review.first_review_time)
+    if review.first_review_time is not None:
+        f_r_t = review.first_review_time.split('\xa0')[0]
+        if len(f_r_t) == 5:
+            f_r_t = '2017-'+f_r_t
+        else:
+            f_r_t = '20'+f_r_t
+        info_list.append(f_r_t)
+    else:
+        info_list.append('')
     for i in range(len(info_list)):
         if info_list[i] is None:
             info_list[i] = ' '
@@ -119,8 +140,24 @@ for j in range(1, len(shops)+1):
     # 'http://www.dianping.com/search/category/1/10/g112', # 上海小吃快餐
     # 'http://www.dianping.com/search/category/1/10/g115', # 上海东南亚菜
     # 'http://www.dianping.com/search/category/1/10/g116',  # 上海西餐
+    li = result_dic.get(city+'_'+category, [])
+    li.append(info_list.copy())
+    result_dic[city+'_'+category] = li
     # file = open('/Users/didi/crawler/output/%s_%s.txt' % (city, category), 'a')
-    # file.write('\t'.join(info_list)+'\n')
+    #
+    # file.write('\t'.join([str(i) for i in info_list])+'\n')
     # file.close()
-    print(info_list)
+    # print(info_list)
     info_list.clear()
+
+book = xlwt.Workbook()
+for city_cate, infos in result_dic.items():
+    sheet = book.add_sheet(city_cate)
+    for i in range(len(title)):
+        sheet.write(0, i, title[i])
+    for i in range(1, len(infos)):
+        for j in range(len(infos[i])):
+            sheet.write(i, j, infos[i][j])
+import datetime
+
+book.save('./all-data-'+ datetime.datetime.now().strftime('%Y_%m_%d')+'.xls')
