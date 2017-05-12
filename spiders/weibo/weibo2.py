@@ -52,10 +52,7 @@ class WeiboCrawler:
                         {"HTTP": "86.100.118.44:80"}, {"HTTP": "88.214.207.89:3128"}, {"HTTP": "91.183.124.41:80"},
                         {"HTTP": "93.51.247.104:80"}]
 
-        self.USERS = [{'username': '18270916129', 'password':'VS7452014'},
-                      {'username': 'jjzhu_ncu@163.com', 'password':'vs7452014'},
-                      {'username': 'jjzhu_zju@163.com', 'password':'jvs7452014'},
-                      {'username': '767543579@qq.com', 'password': 'JOPPER'},]
+        self.USERS = self.get_account()
 
         self.head = {
             'Accept': '*/*',
@@ -70,6 +67,16 @@ class WeiboCrawler:
         }
         self.init_thread()  # 开启进程
         # self.seed = 'http://m.weibo.cn/login?ns=1&backURL=http%3A%2F%2Fm.weibo.cn%2F&backTitle=%CE%A2%B2%A9&vt=4&'
+
+    @staticmethod
+    def get_account():
+        accounts = []
+        with open('conf/account.conf', 'r') as f:
+            for line in f.readlines():
+                fields = line.split(' ')
+                accounts.append({'username': fields[0], 'password': fields[1]})
+        return accounts
+
     def init_thread(self):
         self.logger.info('init  threads: %d' % self.THREAD_NUM)
         for i in range(self.THREAD_NUM):
