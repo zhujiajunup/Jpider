@@ -403,6 +403,7 @@ class WeiboCrawler:
         print(self.USERS[self.CURR_USER_INDEX]['username'] + " login")
         self.login(self.USERS[self.CURR_USER_INDEX]['username'], self.USERS[self.CURR_USER_INDEX]['password'])
         self.change_header(opener)
+
     def start(self):
         # url = 'http://m.weibo.cn/home/me?format=cards'
         # opener = self.make_my_opener()
@@ -492,6 +493,7 @@ class WeiboCrawler:
         page = return_json[0]['page']
         max_page = return_json[0]['maxPage']
         page = 1
+
 
         c = '3963770537235924&type=comment&hot=0&page=2'
         for group in card_group:
