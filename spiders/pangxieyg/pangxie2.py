@@ -6,6 +6,8 @@ import wave
 import logging
 from logging.handlers import RotatingFileHandler
 import ConfigParser
+import os
+import traceback
 
 PLAY_TIME = 10
 
@@ -44,6 +46,9 @@ def logger():
 
 
 def notify():
+    if not os.path.exists(r'.\notify.wav'):
+        logging.error('notify.wav does not exists! please put a wav file named notify.wav in %s' % os.path.abspath('.'))
+        exit(-1)
     for _ in range(PLAY_TIME):
         chunk = 1024
         wf = wave.open(r'.\notify.wav', 'rb')
@@ -64,19 +69,22 @@ def notify():
 
 
 def get_conf():
-    cf = ConfigParser.ConfigParser()
-    cf.read(r'.\conf\info.conf')
+    try:
+        cf = ConfigParser.ConfigParser()
 
-    username = cf.get('user', 'username')
-    password = cf.get('user', 'password')
-    goods = cf.get('user', 'goods').split(' ')
-    return username, password, goods
+        cf.read(r'.\conf\info.conf')
+
+        username = cf.get('user', 'username')
+        password = cf.get('user', 'password')
+        goods = cf.get('user', 'goods').split(' ')
+        return username, password, goods
+    except Exception, e:
+        logging.error(e.message)
 logger()
+
 
 def login(username, password):
     login_url = 'https://www.pangxieyg.com/mobile/index.php?act=login'
-    username = '13486178520'
-    password = 'vs7452014'
     rsp = requests.post(login_url, data={'username': username,
                                          'password': password,
                                          'client': 'wap'})
