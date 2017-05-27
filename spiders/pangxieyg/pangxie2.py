@@ -176,7 +176,6 @@ cookies = dict(username=rsp_json['datas']['username'], key=rsp_json['datas']['ke
 # rsp_json = json.loads(str(rsp.content))
 # if len(rsp_json['datas']['order_group_list']) > 0:
 #     print rsp_json['datas']['order_group_list'][0]['order_list'][0]['extend_order_goods'][0]['goods_name']
-
 # data = dict(
 #     key=cookies['key'],
 #     cart_id='%s|%s' % (good_id, '1'),
