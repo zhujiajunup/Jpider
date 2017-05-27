@@ -167,7 +167,6 @@ rsp_json = login(username, password)
 
 
 cookies = dict(username=rsp_json['datas']['username'], key=rsp_json['datas']['key'])
-
 # rsp = requests.get('https://www.pangxieyg.com/mobile/index.php?act=goods&op=calc&goods_id=117892&area_id=175')
 # rsp = requests.post('https://www.pangxieyg.com/mobile/index.php?'
 #                     'act=member_order&op=order_list&page=10&curpage=1',
