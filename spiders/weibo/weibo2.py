@@ -23,10 +23,8 @@ from spiders.weibo import user_agent
 from spiders import logger
 
 
-
 class WeiboCrawler:
     def __init__(self, user, password, db='weibo'):
-
         self.user = user
         self.password = password
         self.weibo_queue = queue.Queue()
@@ -61,9 +59,6 @@ class WeiboCrawler:
             'Host': 'm.weibo.cn',
             'Proxy-Connection': 'keep-alive',
             'User-Agent': user_agent.agents[random.randint(0, len(user_agent.agents)-1)]
-
-                # 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36'
-                #           ' (KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36'
         }
         self.init_thread()  # 开启进程
         # self.seed = 'http://m.weibo.cn/login?ns=1&backURL=http%3A%2F%2Fm.weibo.cn%2F&backTitle=%CE%A2%B2%A9&vt=4&'
@@ -71,10 +66,15 @@ class WeiboCrawler:
     @staticmethod
     def get_account():
         accounts = []
-        with open('conf/account.conf', 'r') as f:
-            for line in f.readlines():
-                fields = line.split(' ')
-                accounts.append({'username': fields[0], 'password': fields[1]})
+        conf_file = 'conf/account.conf'
+        try:
+            with open(conf_file, 'r') as f:
+                for line in f.readlines():
+                    fields = line.split(' ')
+                    accounts.append({'username': fields[0], 'password': fields[1]})
+        except FileNotFoundError:
+            raise FileNotFoundError('No such file or directory:%s,'
+                                    ' read conf/README to conf weibo account' % conf_file)
         return accounts
 
     def init_thread(self):
@@ -102,7 +102,6 @@ class WeiboCrawler:
             except urllib.error.HTTPError:
                 self.logger.error(traceback.print_exc())
                 sleep(5 * 60)
-
 
     def change_proxy(self, opener):
         proxy_handler = urllib.request.ProxyHandler(self.proxies[self.index % self.proxies.__len__()])
@@ -147,9 +146,8 @@ class WeiboCrawler:
                 try_time += 1
                 self.logger.info('try %d time' %  try_time)
 
-
-
-    def make_my_opener(self):
+    @staticmethod
+    def make_my_opener():
         """
         模拟浏览器发送请求
         :return:
@@ -169,8 +167,6 @@ class WeiboCrawler:
             'Referer': 'https://passport.weibo.cn/signin/login?'
                        'entry=mweibo&res=wel&wm=3349&r=http%3A%2F%2Fm.weibo.cn%2F',
             'User-Agent': user_agent.agents[random.randint(0, len(user_agent.agents)-1)]
-                # 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML,'
-                #           ' like Gecko) Chrome/37.0.2062.124 Safari/537.36'
         }
         for key, value in head.items():
             elem = (key, value)
@@ -178,7 +174,8 @@ class WeiboCrawler:
         opener.addheaders = header
         return opener
 
-    def change_header(self, opener):
+    @staticmethod
+    def change_header(opener):
         head = {
             'Accept': '*/*',
             # 'Accept-Encoding': 'gzip,deflate,sdch',
@@ -204,6 +201,7 @@ class WeiboCrawler:
             self.CRAWLED_USERS.add(str(user_id))
             # self.logger.info('\n\n\n'+str(self.CRAWLED_USERS)+'\n\n\n')
             self.user_queue.put(str(user_id))
+
     def weibo_enqueue(self, user_id):
         if user_id in self.CRAWLED_WEIBO_USERS:
             self.logger.info('\n\n\nuser_id: %s is already crawled\n\n\n' % user_id)
@@ -211,23 +209,21 @@ class WeiboCrawler:
         with self.weibo_set_lock:
             self.CRAWLED_WEIBO_USERS.add(str(user_id))
             self.weibo_queue.put(str(user_id))
+
     def save_blog_info(self, blog_info):
 
         try:
             weibo = Weibo.objects.get(pk=blog_info['id'])
-        except Exception:
+        except Weibo.DoesNotExist:
             weibo = Weibo()
         weibo.id = str(blog_info['id'])
         weibo.created_timestamp = blog_info['created_timestamp']
-
-
         if 'retweeted_status' in blog_info:
             rew_json = blog_info['retweeted_status']
             if rew_json['user']['id'] is not None:
-
                 try:
                     ret_weibo = Weibo.objects.get(pk=rew_json['id'])
-                except Exception:
+                except Weibo.DoesNotExist:
                     ret_weibo = self.save_blog_info(rew_json)
                 weibo.retweented_status = ret_weibo
 
@@ -235,13 +231,10 @@ class WeiboCrawler:
         weibo.source = blog_info['source']
         weibo.text = blog_info['text']
         try:
-            user  = WeiboUser.objects.get(pk=blog_info['user']['id'])
-        except Exception:
+            user = WeiboUser.objects.get(pk=blog_info['user']['id'])
+        except WeiboUser.DoesNotExist:
             user = self.save_user_info(blog_info['user'])
-
-
         weibo.user = user
-
         weibo.save()
         self.logger.info(str(weibo))
         if weibo.retweented_status is not None:  # 添加关系
@@ -249,7 +242,7 @@ class WeiboCrawler:
             try:
                 r = UserRelationship.objects.get(Q(user=weibo.retweented_status.user) & Q(follower=weibo.user))
                 self.logger.info('relationship already exist:' + str(r))
-            except Exception:
+            except UserRelationship.DoesNotExist:
                 self.logger.info('relationship not exist')
                 relation = UserRelationship()
                 relation.user = weibo.retweented_status.user
@@ -289,7 +282,7 @@ class WeiboCrawler:
 
     def grab_user_blogs(self, user_id):
         opener = self.make_my_opener()
-        curr_index = random.randint(0, len(self.USERS)-1)
+        curr_index = random.randint(0, len(self.USERS)-1)  # 随机选取用户
         self.logger.info('user index : %d' % curr_index)
         self.login(self.USERS[curr_index]['username'], self.USERS[curr_index]['password'], opener)
         self.change_header(opener)
@@ -309,7 +302,6 @@ class WeiboCrawler:
         for blog_info in card_group:
             if blog_info['card_type'] != 9:
                 continue
-
             self.save_blog_info(blog_info['mblog'])
         page += 1
         while page <= max_page:
@@ -334,7 +326,7 @@ class WeiboCrawler:
             if not error:
                 page += 1
             time = self.SLEEP_TIME[random.randint(0, len(self.SLEEP_TIME)-1)]
-            self.logger.info('sleep time:%d seconds'%time)
+            self.logger.info('sleep time:%d seconds' % time)
             sleep(time)
             self.change_proxy(opener)
         # self.relogin() # 重新登入
@@ -343,7 +335,7 @@ class WeiboCrawler:
         try:
             r = UserRelationship.objects.get(Q(user=user) & Q(follower=fan))
             self.logger.info('relationship already exist:' + str(r))
-        except Exception:
+        except UserRelationship.DoesNotExist:
             self.logger.info('relationship not exist')
             relation = UserRelationship()
             relation.user = user
@@ -352,7 +344,7 @@ class WeiboCrawler:
             relation.save()
 
     def grab_user(self, user_id):
-        self.logger.info('grab follower for user:%s' % user_id )
+        self.logger.info('grab follower for user:%s' % user_id)
         opener = self.make_my_opener()
         curr_index = random.randint(0, len(self.USERS) - 1)
         self.logger.info('user index : %d' % curr_index)
@@ -361,12 +353,13 @@ class WeiboCrawler:
         page = 1
         try:
             user = WeiboUser.objects.get(pk=user_id)
-        except Exception:
+        except WeiboUser.DoesNotExist:
             url = self.weibo_url_pattern % (str(user_id), str(1))
             rsp = opener.open(url)
             # print(rsp.read())
-            return_json = json.loads(rsp.read().decode())
+            rsp_data = rsp.read().decode()
 
+            return_json = json.loads(rsp_data)
             card = return_json['cards'][0]
             card_group = card['card_group'][0]
             user = self.save_user_info(card_group['mblog']['user'])
@@ -399,16 +392,15 @@ class WeiboCrawler:
 
     def relogin(self, opener):
         print(self.USERS[self.CURR_USER_INDEX]['username']+" logout")
-        opener.open('http://m.weibo.cn/home/logout') # 登出
+        opener.open('http://m.weibo.cn/home/logout')  # 登出
         print('logout successful')
-        self.opener = self.make_my_opener()
         curr_index = random.randint(0, len(self.USERS)-1)
-        while curr_index  == self.CURR_USER_INDEX:
+        while curr_index == self.CURR_USER_INDEX:
             curr_index = random.randint(0, len(self.USERS)-1)
-
         self.CURR_USER_INDEX = curr_index
         print(self.USERS[self.CURR_USER_INDEX]['username'] + " login")
-        self.login(self.USERS[self.CURR_USER_INDEX]['username'], self.USERS[self.CURR_USER_INDEX]['password'])
+        self.login(self.USERS[self.CURR_USER_INDEX]['username'],
+                   self.USERS[self.CURR_USER_INDEX]['password'])
         self.change_header(opener)
 
     def start(self):
@@ -422,7 +414,8 @@ class WeiboCrawler:
         # rsp = opener.open()
         # page = 1
         # user_id = 2210643391
-        # rsp = opener.open('http://m.weibo.cn/api/container/getSecond?containerid=100505%s_-_FOLLOWERS&page=%d' % (str(user_id), page))
+        # rsp = opener.open('http://m.weibo.cn/api/container/getSecond?
+        # containerid=100505%s_-_FOLLOWERS&page=%d' % (str(user_id), page))
         # rsp_json = json.loads(rsp.read().decode())
         # max_page = rsp_json['maxPage']
         # print(rsp_json['maxPage'])
@@ -437,12 +430,13 @@ class WeiboCrawler:
         #     for user_json in rsp_json['cards']:
         #         self.save_user_info(user_json['user'])
         #     page += 1
-        self.user_queue.put('1235919683')
+        self.user_queue.put('2210643391')
         # self.queue.put('2210643391')
 
     def save_pic(self):
         url = 'http://ww2.sinaimg.cn/large/c0788b86jw1f2xfstebzaj20dc0hst9r.jpg'
-        rsp = self.opener.open(url)
+        opener = self.make_my_opener()
+        rsp = opener.open(url)
         pic_data = rsp.read()
         try:
             file = open("d:\\weibo_pic\\1.jpg", 'wb')
@@ -457,7 +451,8 @@ class WeiboCrawler:
         url = 'http://m.weibo.cn/single/rcList?format=cards&id='
         req_url = url + str(blog_id) + '&type=comment&hot=0&page='+str(page_num)
         print('浏览器正在打开url：'+req_url)
-        rsp = self.opener.open(req_url)
+        opener = self.make_my_opener()
+        rsp = opener.open(req_url)
         return_json = json.loads(rsp.read().decode())
         print('请求返回数据:\t'+str(return_json))
         if page_num == 1:
@@ -491,7 +486,8 @@ class WeiboCrawler:
     def grab_weibo(self):
         open_url = 'http://m.weibo.cn/index/feed?format=cards'
         print('浏览器正在打开url：' + open_url)
-        rsp = self.opener.open(open_url)
+        opener = self.make_my_opener()
+        rsp = opener.open(open_url)
         return_json = json.loads(rsp.read().decode())
         print(return_json)
         card_group = return_json[0]['card_group']
@@ -500,8 +496,6 @@ class WeiboCrawler:
         page = return_json[0]['page']
         max_page = return_json[0]['maxPage']
         page = 1
-
-
         c = '3963770537235924&type=comment&hot=0&page=2'
         for group in card_group:
             mblog = group['mblog']
@@ -510,13 +504,13 @@ class WeiboCrawler:
             user_id = user['id']
             self.grab_comment(curr_blog_id)
             # page += 1
-
         n = 20
         while n > 0:
             n -= 1
             open_url = 'http://m.weibo.cn/index/feed?format=cards&next_cursor='+str(next_cursor) + '&page='+str(page)
             print('浏览器正在打开url：' + open_url)
-            rsp = self.opener.open(open_url)
+            opener = self.make_my_opener()
+            rsp = opener.open(open_url)
             return_json = json.loads(rsp.read().decode())
             card_group = return_json[0]['card_group']
             next_cursor = return_json[0]['next_cursor']
@@ -527,15 +521,9 @@ class WeiboCrawler:
                 user = mblog['user']
                 user_id = user['id']
                 self.grab_comment(curr_blog_id)
-            self.change_proxy()
+            self.change_proxy(opener)
             sleep(1*60)
         return
-
-
-    def didi(self):
-        opener = self.make_my_opener()
-        rsp = opener.open('http://100.69.76.2/sqoopRelationship/all?_=1491994174432')
-        print(rsp.read().decode())
 
 
 def main():

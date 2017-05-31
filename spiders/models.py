@@ -17,6 +17,7 @@ class BaiKeRank(models.Model):
     def __str__(self):
         return str(self.rank) +'\t' + self.name + '\t' + self.ori_score
 
+
 class ShopInfo(models.Model):
     shop_id = models.CharField(max_length=20, primary_key=True)
     shop_name = models.CharField(max_length=200, default='')
@@ -51,6 +52,7 @@ class ReviewDedail(models.Model):
     first_review_time = models.CharField(max_length=100, null=True)
     first_review_content = models.TextField(null=True)
 
+
 class WeiboUser(models.Model):
     GENDER = ('m', 'f', 'u')
     id = models.CharField(max_length=12, primary_key=True)  # 用户id
@@ -63,6 +65,7 @@ class WeiboUser(models.Model):
     attNum = models.CharField(max_length=20, null=True)  # 关注数
     fansNum = models.CharField(max_length=20, null=True)  # 粉丝数
     gender = models.IntegerField(choices=enumerate(GENDER), null=True)  # 性别
+
     def __str__(self):
         return '\n\t'+'user: ' + self.screen_name + '\n\t'+'id: '+str(self.id)+'\n\t'\
                + '昵称:'+self.screen_name + '\n\t'+'微博数:'+str(self.mblogNum)+'\n\t'+'关注:'+str(self.attNum)
@@ -78,6 +81,7 @@ class UserRelationship(models.Model):
 
     def __str__(self):
         return self.follower.screen_name +'--->'+self.user.screen_name
+
 
 class Weibo(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
