@@ -27,7 +27,7 @@ class Email(object):
         smtp.quit()
 
 
-def send_email():
+def send_email(subject, msg):
     e = Email()
     e.content_from = 'jjzhu_ncu@163.com'
     e.content_to = '767543579@qq.com'
@@ -37,4 +37,4 @@ def send_email():
     e.send_163()
 
 if __name__ == '__main__':
-    send_email()
+    send_email('', '')

@@ -1,5 +1,8 @@
-to = open('./funny_comment#', 'w')
-with open('./funny_comment') as f:
-    for line in f.readlines():
-        to.write('#'+line)
-to.close()
+def try_expect_finally():
+    try:
+        1/0
+    except Exception:
+        print 'e'
+    finally:
+        print 'finally'
+try_expect_finally()

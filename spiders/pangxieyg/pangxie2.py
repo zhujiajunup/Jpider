@@ -1,53 +1,81 @@
-# -*- edcoding=utf-8 -*-
+# -*- coding=utf-8 -*-
 import requests
 import json
 import pyaudio
 import wave
 import logging
+import logging.config
 from logging.handlers import RotatingFileHandler
 import ConfigParser
+from multiprocessing import Lock
 import os
+import smtplib
+import platform
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from time import sleep
 import traceback
+import threading
+from queue import Queue
+import sys
+import datetime
+reload(sys)
+sys.setdefaultencoding("utf-8")
 
 PLAY_TIME = 10
 
+if not os.path.exists('./record'):
+    os.makedirs('record')
 
-def logger():
-    logging.basicConfig(
-        level=logging.DEBUG,  # 设置日志级别
-        # 设置日志输出格式
-        format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
-        # 设置时间格式
-        datefmt='%Y-%m-%d %H:%M:%S',
-        # 设置日志输出文件名
-        filename='my.log',
-        # 设置文件读写方式
-        filemode='w')
-    # 设置StreamHandler
-    console = logging.StreamHandler()
-    # 设置输出日志级别
-    console.setLevel(logging.DEBUG)
-    rotating_handler = RotatingFileHandler(
-        'my.log',  # 设置输出日志文件名
-        maxBytes=10 * 1024 * 1024,  # 指定每个日志文件的大小（字节），这里是10M
-        backupCount=10  # 指定备份的日志文件数
-    )
-    rotating_handler.setLevel(logging.DEBUG)  # 设置级别
-    formatter = logging.Formatter(
-        fmt='%(asctime)s  %(name)-12s: %(levelname)-8s %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S'
-    )
-    rotating_handler.setFormatter(formatter)
-    # 可以通过addHandler添加其他的处理方式
-    logging.getLogger('').addHandler(rotating_handler)
+if not os.path.exists('./log'):
+    os.mkdir('log')
 
-    console.setFormatter(fmt=formatter)
-    logging.getLogger('').addHandler(console)
+
+def logger_conf():
+    """
+    load basic logger configure
+    :return: configured logger
+    """
+
+    if platform.system() == 'Windows':
+
+        logging.config.fileConfig(os.path.abspath('.')+'\\conf\\logging.conf')
+    elif platform.system() == 'Linux':
+
+        logging.config.fileConfig(os.path.abspath('.')+'/conf/logging.conf')
+    elif platform.system() == 'Darwin':
+        print(os.path.abspath('../../'))
+        logging.config.fileConfig(os.path.abspath('.') + '/conf/logging.conf')
+    logger = logging.getLogger('simpleLogger')
+
+    return logger
+
+
+def send_email2(subject, text, to):
+    LOGGER.info('send email')
+
+    if not isinstance(to, list):
+        LOGGER.error('input error, receive mail should a type of list, but get %s' % type(to))
+        exit(-1)
+    SERVER = 'smtp.163.com'
+    FROM = 'u9334486fenpo3@163.com'
+    LOGGER.info('from:%s\tto:%s' % (FROM, ','.join(to)))
+    msg = MIMEMultipart('alternative')
+    msg['Subject'] = subject
+    msg['From'] = FROM
+    msg['To'] = ', '.join(to)
+    part = MIMEText(text, 'plain', 'utf-8')
+    msg.attach(part)
+    server = smtplib.SMTP(SERVER, port=25)
+    server.login(FROM, 'jvs7452014')
+    server.sendmail(FROM, to, msg.as_string())
+    server.quit()
+    LOGGER.info('email send successful')
 
 
 def notify():
     if not os.path.exists(r'.\notify.wav'):
-        logging.error('notify.wav does not exists! please put a wav file named notify.wav in %s' % os.path.abspath('.'))
+        LOGGER.error('notify.wav does not exists! please put a wav file named notify.wav in %s' % os.path.abspath('.'))
         exit(-1)
     for _ in range(PLAY_TIME):
         chunk = 1024
@@ -69,27 +97,37 @@ def notify():
 
 
 def get_conf():
+    if not os.path.exists(r'.\conf\info.conf'):
+        LOGGER.error('conf\info.conf does not exists! please create a folder named conf under this'
+                      ' path %s and put a file named info.conf' % os.path.abspath('.'))
+        exit(-1)
+    LOGGER.info('get configure from %s\conf\info.conf' % os.path.abspath('.'))
     try:
         cf = ConfigParser.ConfigParser()
-
         cf.read(r'.\conf\info.conf')
-
         username = cf.get('user', 'username')
         password = cf.get('user', 'password')
         goods = cf.get('user', 'goods').split(' ')
-        return username, password, goods
-    except Exception, e:
-        logging.error(e.message)
-logger()
+        receives = cf.get('mail', 'to').split(' ')
+        thread_num = int(cf.get('thread', 'thread_num'))
+        LOGGER.info('configuration infomation:'
+                     '\n\tusername:%s\n\tpassword:%s\n\tgood_ids:%s\n\tmail_to:%s\n\tthread_num:%d\n' %
+                     (username, password, ','.join(goods), ','.join(receives), thread_num))
+        return username, password, goods, receives, thread_num
+    except Exception as e:
+        LOGGER.error(traceback.format_exc())
+
+LOGGER = logger_conf()
 
 
 def login(username, password):
+    LOGGER.info('login    username:%s\tpassword:%s' % (username, password))
     login_url = 'https://www.pangxieyg.com/mobile/index.php?act=login'
     rsp = requests.post(login_url, data={'username': username,
                                          'password': password,
                                          'client': 'wap'})
     rsp_json = json.loads(str(rsp.content))
-    logging.info('login....username:%s\tpassword:%s' % (username, password))
+    LOGGER.info('login successful')
     return rsp_json
 
 
@@ -107,7 +145,7 @@ def buy_step1(cookies, good_id):
     return rsp_json
 
 
-def buy_step2(step1_json, cookies):
+def buy_step2(step1_json, cookies, good_id):
     buy_step2_url = 'https://www.pangxieyg.com/mobile/index.php?act=member_buy&op=buy_step2'
     rsp_json = step1_json
     address_api = rsp_json['datas']['address_api']
@@ -121,7 +159,7 @@ def buy_step2(step1_json, cookies):
         if len(store_voucher_info) == 0:
             voucher_tmp.append('undefined|' + str(k) + '|undefined')
     pay_message_tmp = []
-    for k, v in store_final_total_list:
+    for k, v in store_final_total_list.items():
         pay_message_tmp.append(str(k) + '|')
 
     data = dict(
@@ -147,91 +185,85 @@ def buy_step2(step1_json, cookies):
         fbcart='',
         pay_message=','.join(pay_message_tmp)
     )
-    rsp = requests.post(buy_step2_url, data=data, cookies=cookies)
-    rsp_json = json.loads(str(rsp.content))
-    logging.info('购买成功过，快到订单界面付款吧！！！！')
-
-username, password, goods = get_conf()
-good_id = goods[0]
-buy_goods_url = 'https://www.pangxieyg.com/wap/tmpl/order/buy_step2.html?goods_id=%s&buynum=1&type=5' % good_id
-good_detail = 'https://www.pangxieyg.com/mobile/index.php?act=goods&op=goods_detail&goods_id=%s' % good_id
-
-# login_url = 'https://www.pangxieyg.com/mobile/index.php?act=login'
-# username = '13486178520'
-# password = 'vs7452014'
-# rsp = requests.post(login_url, data={'username': username,
-#                                      'password': password,
-#                                      'client': 'wap'})
-# rsp_json = json.loads(str(rsp.content))
-rsp_json = login(username, password)
+    requests.post(buy_step2_url, data=data, cookies=cookies)
 
 
+ordered = set()
+
+username, password, goods, receives, thread_num = get_conf()
+good_detail = 'https://www.pangxieyg.com/mobile/index.php?act=goods&op=goods_detail&goods_id=%s'
+good_detail_page_url = 'https://www.pangxieyg.com/wap/tmpl/product_detail.html?goods_id=%s&goods_promotion_type=5'
+
+goods_queue = Queue(maxsize=100)
+ordered_lock = Lock()
+for g in goods:
+    f = open('./record/%s_%s.txt' % (g, datetime.datetime.now().strftime('%Y-%m-%d')), 'a')
+    f.close()
+    goods_queue.put(g)
+
+while True:
+    try:
+        rsp_json = login(username, password)
+        if 'datas' in rsp_json:
+            break
+    except Exception as e:
+        LOGGER.error(traceback.format_exc())
+        sleep(5)
 cookies = dict(username=rsp_json['datas']['username'], key=rsp_json['datas']['key'])
-# rsp = requests.get('https://www.pangxieyg.com/mobile/index.php?act=goods&op=calc&goods_id=117892&area_id=175')
-# rsp = requests.post('https://www.pangxieyg.com/mobile/index.php?'
-#                     'act=member_order&op=order_list&page=10&curpage=1',
-#                     data={'key': cookies['key'], 'state_type': '', 'order_key': ''},
-#                     cookies=cookies)
-# rsp_json = json.loads(str(rsp.content))
-# if len(rsp_json['datas']['order_group_list']) > 0:
-#     print rsp_json['datas']['order_group_list'][0]['order_list'][0]['extend_order_goods'][0]['goods_name']
-# data = dict(
-#     key=cookies['key'],
-#     cart_id='%s|%s' % (good_id, '1'),
-#     ifcart='',
-#     address_id='',
-#     type='5'
-# )
-# rsp = requests.post(buy_step1, data=data, cookies=cookies)
-# rsp_json = json.loads(str(rsp.content))
-# rsp_json = buy_step1(cookies, good_id)
-# buy_step2(rsp_json, cookies)
-# print rsp_json['datas']['address_api']
-# address_api = rsp_json['datas']['address_api']
-# address_info = rsp_json['datas']['address_info']
-# store_cart_list = rsp_json['datas']['store_cart_list']
-# store_final_total_list = rsp_json['datas']['store_final_total_list']
-#
-# voucher_tmp = []
-# for k, v in store_cart_list.items():
-#     store_voucher_info = v['store_voucher_info']
-#     if len(store_voucher_info) == 0:
-#         voucher_tmp.append('undefined|'+str(k)+'|undefined')
-# pay_message_tmp = []
-# for k, v in store_final_total_list:
-#     pay_message_tmp.append(str(k)+'|')
-#
-# data = dict(
-#     key=cookies['key'],
-#     ifcart='',
-#     cart_id='%s|%s' % (good_id, '1'),
-#     address_id=address_info['address_id'],
-#     vat_hash=rsp_json['datas']['vat_hash'],
-#     offpay_hash=address_api['offpay_hash'],
-#     offpay_hash_batch=address_api['offpay_hash_batch'],
-#     pay_name='online',
-#     invoice_id='0',
-#     voucher=','.join(voucher_tmp),
-#     pd_pay='0',
-#     password='',
-#     fcode='',
-#     return_bank='',
-#     return_account='',
-#     return_account_user='',
-#     return_bank_addr='',
-#     rcb_pay='0',
-#     rpt='',
-#     fbcart='',
-#     pay_message=','.join(pay_message_tmp)
-# )
-# rsp = requests.post(buy_step2, data=data, cookies=cookies)
 
 
-for _ in range(2):
-    rsp_json = buy_step1(cookies, good_id)
-    if 'error' in rsp_json['datas']:
-        print rsp_json['datas']['error']
-    else:
-        buy_step2(rsp_json, cookies)
-        notify()
+def monitor(good_id):
+
+        try:
+            LOGGER.info('open url: %s ' % (good_detail % good_id))
+            good_detail_rsp = requests.get(good_detail % good_id, cookies=cookies)
+            good_detail_rsp_json = json.loads(str(good_detail_rsp.content))
+            if good_detail_rsp_json['code'] == 200:
+                good_name = good_detail_rsp_json['datas']['goods_info']['goods_name']
+            else:
+                LOGGER.error(good_detail % good_id + ' failed')
+                sleep(1 * 60)
+                return
+            LOGGER.info('buy step1: %s' % good_id)
+            rsp_json = buy_step1(cookies, good_id)
+            good_name = good_name.encode('utf-8')
+            if 'error' in rsp_json['datas']:
+
+                print u'%s(%s):%s' % (good_name, good_id, rsp_json['datas']['error'])
+            else:
+                with open('./record/%s_%s.txt' % (good_id, datetime.datetime.now().strftime('%Y-%m-%d')), 'a') as f:
+                    f.write('%s\t%s\t有货啦\n' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), good_name))
+                    f.flush()
+                if good_id in ordered:
+
+                    LOGGER.info(u"%s[%s] 有货，已下单" % (good_name, good_id))
+                    sleep(1*60)
+                else:
+                    LOGGER.info(u'buy step2:%s[%s]' % (good_name, good_id))
+                    buy_step2(rsp_json, cookies, good_id)
+                    LOGGER.info(u'%s[%s]购买成功了，快到订单界面付款吧！！！！' % (good_name, good_id))
+                    with ordered_lock:
+                        ordered.add(good_id)
+                    send_email2(u'【螃蟹云购】下单成功啦', u'下单用户：%s\n商品名：%s\n商品id:%s\n商品链接:%s\n' %
+                                (username, good_name, good_id, good_detail_page_url % good_id), receives)
+                    notify()
+
+            sleep(5)
+        except Exception as e:
+
+            LOGGER.error(traceback.format_exc())
+            sleep(60)
+        finally:
+            goods_queue.put(good_id)
+
+
+def worker():
+    while True:
+        good_id = goods_queue.get()
+        monitor(good_id)
+
+for i in range(thread_num):
+    t = threading.Thread(target=worker, name='pangxie-thread-%d' % i)
+    t.start()
+
 

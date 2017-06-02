@@ -1,0 +1,1 @@
+__doc__ = 'pyinstaller -F pangxie2.py'

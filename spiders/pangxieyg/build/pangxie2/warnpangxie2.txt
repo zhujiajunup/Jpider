@@ -1,30 +1,15 @@
 missing module named org - imported by copy
-missing module named readline - imported by cmd, pdb
-missing module named 'org.python' - imported by pickle, xml.sax
 missing module named fcntl - imported by tempfile, subprocess
-missing module named riscosenviron - imported by os
-missing module named riscospath - imported by os
-missing module named riscos - imported by os
-missing module named ce - imported by os
-missing module named _emx_link - imported by os
-missing module named os2 - imported by os
-missing module named pwd - imported by posixpath, getpass, netrc
-missing module named posix - imported by os
-missing module named resource - imported by posix
+missing module named readline - imported by cmd, pdb
+missing module named pwd - imported by posixpath, getpass, netrc, shutil, tarfile
+missing module named _dummy_threading - imported by dummy_threading
 missing module named _scproxy - imported by urllib
 missing module named EasyDialogs - imported by getpass
 missing module named termios - imported by getpass
 missing module named SOCKS - imported by ftplib
 missing module named rourl2path - imported by urllib
-missing module named 'urllib.request' - imported by requests.compat
-missing module named 'urllib.parse' - imported by requests.compat
-missing module named ipaddress - imported by urllib3.packages.ssl_match_hostname._implementation
-missing module named backports - imported by urllib3.packages.ssl_match_hostname
-missing module named _dummy_threading - imported by dummy_threading
-missing module named simplejson - imported by requests.compat
-missing module named 'urllib3.packages.six.moves' - imported by urllib3.exceptions, urllib3.connectionpool, urllib3.connection, urllib3.util.response, urllib3.request, urllib3.response, urllib3.poolmanager
-missing module named socks - imported by urllib3.contrib.socks
 missing module named vms_lib - imported by platform
+missing module named 'org.python' - imported by pickle, xml.sax
 missing module named 'java.lang' - imported by platform, xml.sax._exceptions
 missing module named java - imported by platform
 missing module named _xmlplus - imported by xml
@@ -38,6 +23,24 @@ missing module named winreg.OpenKeyEx - imported by winreg, platform
 missing module named winreg.HKEY_LOCAL_MACHINE - imported by winreg, platform
 missing module named winreg.QueryValueEx - imported by winreg, platform
 missing module named winreg.CloseKey - imported by winreg, platform
+missing module named riscosenviron - imported by os
+missing module named riscospath - imported by os
+missing module named riscos - imported by os
+missing module named ce - imported by os
+missing module named _emx_link - imported by os
+missing module named os2 - imported by os
+missing module named posix - imported by os
+missing module named resource - imported by posix
+missing module named _xmlrpclib - imported by xmlrpclib
+missing module named _sysconfigdata - imported by distutils.sysconfig
+missing module named grp - imported by shutil, tarfile
+missing module named 'urllib.request' - imported by requests.compat
+missing module named 'urllib.parse' - imported by requests.compat
+missing module named ipaddress - imported by urllib3.packages.ssl_match_hostname._implementation
+missing module named backports - imported by urllib3.packages.ssl_match_hostname
+missing module named simplejson - imported by requests.compat
+missing module named 'urllib3.packages.six.moves' - imported by urllib3.exceptions, urllib3.connectionpool, urllib3.connection, urllib3.util.response, urllib3.request, urllib3.response, urllib3.poolmanager
+missing module named socks - imported by urllib3.contrib.socks
 missing module named 'OpenSSL.crypto' - imported by urllib3.contrib.pyopenssl
 missing module named 'cryptography.x509' - imported by urllib3.contrib.pyopenssl
 missing module named six - imported by urllib3.contrib.pyopenssl
