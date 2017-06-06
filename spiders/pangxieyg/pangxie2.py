@@ -22,13 +22,14 @@ import datetime
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-PLAY_TIME = 10
-
 if not os.path.exists('./record'):
     os.makedirs('record')
 
 if not os.path.exists('./log'):
     os.mkdir('log')
+
+PLAY_TIME = 10
+ordered = set()
 
 
 def logger_conf():
@@ -49,7 +50,33 @@ def logger_conf():
     logger = logging.getLogger('simpleLogger')
 
     return logger
+LOGGER = logger_conf()
 
+
+def get_conf():
+    if not os.path.exists(r'.\conf\info.conf'):
+        LOGGER.error('conf\info.conf does not exists! please create a folder named conf under this'
+                      ' path %s and put a file named info.conf' % os.path.abspath('.'))
+        exit(-1)
+    LOGGER.info('get configure from %s\conf\info.conf' % os.path.abspath('.'))
+    try:
+        cf = ConfigParser.ConfigParser()
+        cf.read(r'.\conf\info.conf')
+        username = cf.get('user', 'username')
+        password = cf.get('user', 'password')
+        goods = cf.get('user', 'goods').split(' ')
+        receives = cf.get('mail', 'to').split(' ')
+        thread_num = int(cf.get('thread', 'thread_num'))
+        timeout = float(cf.get('main', 'timeout'))
+        sleep_time = int(cf.get('main', 'sleep'))
+        LOGGER.info('configuration infomation:'
+                     '\n\tusername:%s\n\tpassword:%s\n\tgood_ids:%s\n\tmail_to:%s\n\tthread_num:%d\n' %
+                     (username, password, ','.join(goods), ','.join(receives), thread_num))
+        return username, password, goods, receives, thread_num, timeout, sleep_time
+    except Exception as e:
+        LOGGER.error(traceback.format_exc())
+
+username, password, goods, receives, thread_num, timeout, sleep_time = get_conf()
 
 def send_email2(subject, text, to):
     LOGGER.info('send email')
@@ -96,36 +123,12 @@ def notify():
         p.terminate()
 
 
-def get_conf():
-    if not os.path.exists(r'.\conf\info.conf'):
-        LOGGER.error('conf\info.conf does not exists! please create a folder named conf under this'
-                      ' path %s and put a file named info.conf' % os.path.abspath('.'))
-        exit(-1)
-    LOGGER.info('get configure from %s\conf\info.conf' % os.path.abspath('.'))
-    try:
-        cf = ConfigParser.ConfigParser()
-        cf.read(r'.\conf\info.conf')
-        username = cf.get('user', 'username')
-        password = cf.get('user', 'password')
-        goods = cf.get('user', 'goods').split(' ')
-        receives = cf.get('mail', 'to').split(' ')
-        thread_num = int(cf.get('thread', 'thread_num'))
-        LOGGER.info('configuration infomation:'
-                     '\n\tusername:%s\n\tpassword:%s\n\tgood_ids:%s\n\tmail_to:%s\n\tthread_num:%d\n' %
-                     (username, password, ','.join(goods), ','.join(receives), thread_num))
-        return username, password, goods, receives, thread_num
-    except Exception as e:
-        LOGGER.error(traceback.format_exc())
-
-LOGGER = logger_conf()
-
-
 def login(username, password):
     LOGGER.info('login    username:%s\tpassword:%s' % (username, password))
     login_url = 'https://www.pangxieyg.com/mobile/index.php?act=login'
     rsp = requests.post(login_url, data={'username': username,
                                          'password': password,
-                                         'client': 'wap'})
+                                         'client': 'wap'}, timeout=timeout)
     rsp_json = json.loads(str(rsp.content))
     LOGGER.info('login successful')
     return rsp_json
@@ -140,7 +143,7 @@ def buy_step1(cookies, good_id):
         address_id='',
         type='5'
     )
-    rsp = requests.post(buy_step1_url, data=data, cookies=cookies)
+    rsp = requests.post(buy_step1_url, data=data, cookies=cookies, timeout=timeout)
     rsp_json = json.loads(str(rsp.content))
     return rsp_json
 
@@ -185,12 +188,10 @@ def buy_step2(step1_json, cookies, good_id):
         fbcart='',
         pay_message=','.join(pay_message_tmp)
     )
-    requests.post(buy_step2_url, data=data, cookies=cookies)
+    requests.post(buy_step2_url, data=data, cookies=cookies, timeout=timeout)
 
 
-ordered = set()
 
-username, password, goods, receives, thread_num = get_conf()
 good_detail = 'https://www.pangxieyg.com/mobile/index.php?act=goods&op=goods_detail&goods_id=%s'
 good_detail_page_url = 'https://www.pangxieyg.com/wap/tmpl/product_detail.html?goods_id=%s&goods_promotion_type=5'
 
@@ -208,53 +209,50 @@ while True:
             break
     except Exception as e:
         LOGGER.error(traceback.format_exc())
-        sleep(5)
+        sleep(sleep_time)
 cookies = dict(username=rsp_json['datas']['username'], key=rsp_json['datas']['key'])
 
 
 def monitor(good_id):
+    LOGGER.info('--'*4 + 'get good id: %s' % good_id + '--'*4)
+    try:
+        LOGGER.info('open url: %s ' % (good_detail % good_id))
+        good_detail_rsp = requests.get(good_detail % good_id, cookies=cookies, timeout=timeout)
+        good_detail_rsp_json = json.loads(str(good_detail_rsp.content))
+        if good_detail_rsp_json['code'] == 200:
+            good_name = good_detail_rsp_json['datas']['goods_info']['goods_name']
+        else:
+            LOGGER.error(good_detail % good_id + ' failed')
+            return
+        LOGGER.info('buy step1: %s' % good_id)
+        rsp_json = buy_step1(cookies, good_id)
+        good_name = good_name.encode('utf-8')
+        if 'error' in rsp_json['datas']:
 
-        try:
-            LOGGER.info('open url: %s ' % (good_detail % good_id))
-            good_detail_rsp = requests.get(good_detail % good_id, cookies=cookies)
-            good_detail_rsp_json = json.loads(str(good_detail_rsp.content))
-            if good_detail_rsp_json['code'] == 200:
-                good_name = good_detail_rsp_json['datas']['goods_info']['goods_name']
+            LOGGER.info(u'%s(%s):%s' % (good_name, good_id, rsp_json['datas']['error']))
+        else:
+            with open('./record/%s_%s.txt' % (good_id, datetime.datetime.now().strftime('%Y-%m-%d')), 'a') as f:
+                f.write('%s\t%s\t有货啦\n' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), good_name))
+                f.flush()
+            if good_id in ordered:
+
+                LOGGER.info(u"%s[%s] 有货，已下单" % (good_name, good_id))
+
             else:
-                LOGGER.error(good_detail % good_id + ' failed')
-                sleep(1 * 60)
-                return
-            LOGGER.info('buy step1: %s' % good_id)
-            rsp_json = buy_step1(cookies, good_id)
-            good_name = good_name.encode('utf-8')
-            if 'error' in rsp_json['datas']:
+                LOGGER.info(u'buy step2:%s[%s]' % (good_name, good_id))
+                buy_step2(rsp_json, cookies, good_id)
+                LOGGER.info(u'%s[%s]购买成功了，快到订单界面付款吧！！！！' % (good_name, good_id))
+                with ordered_lock:
+                    ordered.add(good_id)
+                send_email2(u'【螃蟹云购】下单成功啦', u'下单用户：%s\n商品名：%s\n商品id:%s\n商品链接:%s\n' %
+                            (username, good_name, good_id, good_detail_page_url % good_id), receives)
+                notify()
+    except Exception as e:
 
-                print u'%s(%s):%s' % (good_name, good_id, rsp_json['datas']['error'])
-            else:
-                with open('./record/%s_%s.txt' % (good_id, datetime.datetime.now().strftime('%Y-%m-%d')), 'a') as f:
-                    f.write('%s\t%s\t有货啦\n' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), good_name))
-                    f.flush()
-                if good_id in ordered:
-
-                    LOGGER.info(u"%s[%s] 有货，已下单" % (good_name, good_id))
-                    sleep(1*60)
-                else:
-                    LOGGER.info(u'buy step2:%s[%s]' % (good_name, good_id))
-                    buy_step2(rsp_json, cookies, good_id)
-                    LOGGER.info(u'%s[%s]购买成功了，快到订单界面付款吧！！！！' % (good_name, good_id))
-                    with ordered_lock:
-                        ordered.add(good_id)
-                    send_email2(u'【螃蟹云购】下单成功啦', u'下单用户：%s\n商品名：%s\n商品id:%s\n商品链接:%s\n' %
-                                (username, good_name, good_id, good_detail_page_url % good_id), receives)
-                    notify()
-
-            sleep(5)
-        except Exception as e:
-
-            LOGGER.error(traceback.format_exc())
-            sleep(60)
-        finally:
-            goods_queue.put(good_id)
+        LOGGER.error(traceback.format_exc())
+    finally:
+        goods_queue.put(good_id)
+        LOGGER.info('--' * 4 + 'put good id back: %s' % good_id + '--' * 4)
 
 
 def worker():
