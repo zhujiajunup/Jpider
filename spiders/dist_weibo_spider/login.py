@@ -2,7 +2,7 @@ import execjs
 import requests
 import re
 import json
-
+import os
 
 def get_session():
     return requests.session()
@@ -49,7 +49,7 @@ def login():
     password = 'JOPPER'
     json_pattern = r'.*?\((.*)\)'
     session = get_session()
-    exec_js = get_js_exec(r'E:\workspace\space4py\Jpider\spiders\dist_weibo_spider\js\ssologin.js')
+    exec_js = get_js_exec(os.path.split(os.path.realpath(__file__))[0]+'/js/ssologin.js')
     su = get_encodename(name, exec_js)
     print(su)
     post_url = 'http://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.18)'
