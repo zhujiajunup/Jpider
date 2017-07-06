@@ -3,7 +3,8 @@ import requests
 import re
 import json
 import os
-
+from spiders.dist_weibo_spider.dao.redis_cookies import RedisCookies
+from spiders.dist_weibo_spider.headers import headers
 def get_session():
     return requests.session()
 
@@ -34,7 +35,7 @@ def get_prelogin_info(prelogin_url, session):
 
 
 def get_redirect(data, post_url, session):
-    logining_page = session.post(post_url, data=data)
+    logining_page = session.post(post_url, data=data, headers=headers)
     login_loop = logining_page.content.decode('GBK')
     pa = r'location\.replace\([\'"](.*?)[\'"]\)'
     return re.findall(pa, login_loop)[0]
@@ -45,11 +46,11 @@ def do_login(session, url):
 
 
 def login():
-    name = '767543579@qq.com'
-    password = 'JOPPER'
+    name = '18270916129'
+    password = 'VS7452014'
     json_pattern = r'.*?\((.*)\)'
     session = get_session()
-    exec_js = get_js_exec(os.path.split(os.path.realpath(__file__))[0]+'/js/ssologin.js')
+    exec_js = get_js_exec(os.path.split(os.path.realpath(__file__))[0]+'/../js/ssologin.js')
     su = get_encodename(name, exec_js)
     print(su)
     post_url = 'http://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.18)'
@@ -86,10 +87,16 @@ def login():
     url = get_redirect(data, post_url, session)
     print(url)
     login_info = do_login(session, url)
+    print(login_info)
     m = re.match(json_pattern, login_info)
     info = json.loads(m.group(1))
     print(info)
+    print(session.cookies.get_dict())
+    RedisCookies.save_cookies(name, info['userinfo']['uniqueid'],
+                              cookies=session.cookies.get_dict())
+
     return session, info
+
     # session.get('http://weibo.com/u')
 if __name__ == '__main__':
     login()
