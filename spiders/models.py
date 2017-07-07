@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.utils.translation import ugettext_lazy as _
+import datetime
 # Create your models here.
 
 
@@ -9,7 +10,7 @@ class ShopId(models.Model):
 
 
 class BaiKeRank(models.Model):
-    rank = models.IntegerField(max_length=20, null=True)
+    rank = models.IntegerField(null=True)
     name = models.CharField(max_length=50, null=True)
     ori_score = models.CharField(max_length=50, null=True)
     rank_time = models.CharField(max_length=20)
@@ -93,4 +94,26 @@ class Weibo(models.Model):
 
     def __str__(self):
         return '\n\t'+'user:'+self.user.screen_name+'\n\t'+'blog_id:'+self.id
+
+
+class Comment(models.Model):
+    name = models.CharField(_('name'), max_length=64)
+    email_address = models.EmailField(_('email address'))
+    homepage = models.URLField(_('home page'), blank=True)
+    comment = models.TextField(_('comment'))
+    pub_date = models.DateTimeField(_('Published date'), editable=False, auto_now_add=True)
+    is_spam = models.BooleanField(_('spam?'), default=False, editable=False)
+
+    class Meta:
+        verbose_name = _('comment')
+        verbose_name_plural = _('comment')
+
+
+class Step(models.Model):
+    steps = models.IntegerField()
+    curr_time = models.DateTimeField(default=datetime.datetime.now())
+
+    def __str__(self):
+        return '{steps:%d, time:%s}' % (self.steps, self.curr_time.strftime('%Y-%m-%d %H:%M:%S'))
+
 
