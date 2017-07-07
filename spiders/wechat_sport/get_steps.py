@@ -39,4 +39,4 @@ while True:
     step.curr_time = datetime.datetime.now()
     step.save()
     pprint(step)
-    sleep(3*60)
+    sleep(1*60)
