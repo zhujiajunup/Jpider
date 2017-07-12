@@ -47,23 +47,21 @@ def do_login(session, url):
     return session.get(url).text
 
 @app.task(ignore_result=True)
-def login(name, password):
+def clean():
     RedisCookies.clean()
-    name = '18270916129'
-    password = 'VS7452014'
+
+@app.task(ignore_result=True)
+def login(name='', password=''):
     json_pattern = r'.*?\((.*)\)'
     session = get_session()
     exec_js = get_js_exec(os.path.split(os.path.realpath(__file__))[0]+'/../js/ssologin.js')
     su = get_encodename(name, exec_js)
-    print(su)
     post_url = 'http://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.18)'
     prelogin_url = 'http://login.sina.com.cn/sso/prelogin.php?entry=weibo&callback=sinaSSOController.preloginCallBack&' \
                    'su=' + su + '&rsakt=mod&checkpin=1&client=ssologin.js(v1.4.18)'
 
     pre_obj = get_prelogin_info(prelogin_url, session)
-    print(pre_obj)
     ps = get_password(password=password, pre_obj=pre_obj, exec_js=exec_js)
-    print(ps)
     data = {
         'entry': 'weibo',
         'gateway': '1',
@@ -88,13 +86,9 @@ def login(name, password):
         'returntype': 'META',
     }
     url = get_redirect(data, post_url, session)
-    print(url)
     login_info = do_login(session, url)
-    print(login_info)
     m = re.match(json_pattern, login_info)
     info = json.loads(m.group(1))
-    print(info)
-    print(session.cookies.get_dict())
     RedisCookies.save_cookies(name, info['userinfo']['uniqueid'],
                               cookies=session.cookies.get_dict())
 
