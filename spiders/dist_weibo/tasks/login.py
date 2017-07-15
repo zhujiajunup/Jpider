@@ -5,7 +5,8 @@ import json
 import os
 from tasks.workers import app
 from dao.redis_cookies import RedisCookies
-from headers import headers
+from headers import get_header
+from logger import LOGGER
 
 def get_session():
     return requests.session()
@@ -37,7 +38,10 @@ def get_prelogin_info(prelogin_url, session):
 
 
 def get_redirect(data, post_url, session):
-    logining_page = session.post(post_url, data=data, headers=headers)
+    print(data)
+    print(post_url)
+    logining_page = session.post(post_url, data=data, headers=get_header())
+    print(logining_page)
     login_loop = logining_page.content.decode('GBK')
     pa = r'location\.replace\([\'"](.*?)[\'"]\)'
     return re.findall(pa, login_loop)[0]
@@ -86,13 +90,14 @@ def login(name='', password=''):
         'returntype': 'META',
     }
     url = get_redirect(data, post_url, session)
+    print(url)
     login_info = do_login(session, url)
     m = re.match(json_pattern, login_info)
     info = json.loads(m.group(1))
     RedisCookies.save_cookies(name, info['userinfo']['uniqueid'],
                               cookies=session.cookies.get_dict())
 
-    return session, info
+#     return session, info
 
     # session.get('http://weibo.com/u')
 if __name__ == '__main__':

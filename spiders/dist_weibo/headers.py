@@ -43,11 +43,19 @@ user_agents = [
     'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.0 Safari/537.36'
 ]
 
+def get_header():
+    header = {
+        'User-Agent': random.choice(user_agents),
+        'Accept-Encoding': 'gzip, deflate',
+        'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Connection': 'keep-alive'
+    }
+    return header
 
-headers = {
-    'User-Agent': random.choice(user_agents),
-    'Accept-Encoding': 'gzip, deflate, sdch',
-    'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'Connection': 'keep-alive'
-}
+
+def get_header2():
+    header = get_header()
+    header['Proxy-Connection'] = 'keep-alive'
+    header['Upgrade-Insecure-Requests'] = 1
+    header['Host'] = 'weibo.com'

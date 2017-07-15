@@ -14,7 +14,7 @@ def logger_conf():
         logging.config.fileConfig(os.path.abspath('../../')+'\\conf\\logging.conf')
     elif platform.system() == 'Linux':
 
-        logging.config.fileConfig(os.path.abspath('.../../')+'/conf/logging.conf')
+        logging.config.fileConfig(os.path.abspath('../../')+'/conf/logging.conf')
     elif platform.system() == 'Darwin':
         print(os.path.abspath('../../'))
         logging.config.fileConfig(os.path.abspath('../../') + '/conf/logging.conf')

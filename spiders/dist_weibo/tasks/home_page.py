@@ -1,25 +1,25 @@
 import json
 from dao.redis_cookies import RedisCookies
-from headers import headers
+from headers import get_header
 import requests
 from tasks.workers import app
 from bs4 import BeautifulSoup
 import re
 from model.models import Weibo
-from dao.sqlalchemy_session import SqlSession
+from dao.sqlalchemy_session import db_session
 
 @app.task
 def home_page():
     home_url = 'http://weibo.com/u/{}?is_ori=1&is_tag=0&profile_ftype=1&page=1'
 
-    user_cookies = RedisCookies.fetch_cookies()
-    cookies_json = json.loads(user_cookies)
+    cookies_json = RedisCookies.fetch_cookies()
+
 
     cookies = cookies_json['cookies']
 
     unique_id = cookies_json['unique_id']
 
-    resp = requests.get(url=home_url.format(unique_id), headers=headers, cookies=cookies, verify=False).text
+    resp = requests.get(url=home_url.format(unique_id), headers=get_header(), cookies=cookies, verify=False).text
 
     home_html = BeautifulSoup(resp, 'html.parser')
 
@@ -62,7 +62,8 @@ def home_page():
                 if _a.has_attr('action-type'):
                     source = _a.text
             weibo = Weibo(source=source, url=weibo_url, date_time=date, content=content)
-            SqlSession.insert(weibo)
+            db_session.add(weibo)
+            db_session.commit()
             weibo_info.append('date:%s\tsource:%s\turl:%s' % (date, source, weibo_url))
     return weibo_info
 
