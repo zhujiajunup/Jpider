@@ -5,4 +5,4 @@ spiders/__pycache__/
 spiders/migrations/
 templates/
 *.log
-/*.conf
+*/*.conf
