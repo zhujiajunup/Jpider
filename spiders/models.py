@@ -65,8 +65,8 @@ class WeiboUser(models.Model):
     mblogNum = models.CharField(max_length=20, null=True)  # 微博数
     attNum = models.CharField(max_length=20, null=True)  # 关注数
     fansNum = models.CharField(max_length=20, null=True)  # 粉丝数
-    gender = models.IntegerField(choices=enumerate(GENDER), null=True)  # 性别
-
+    gender = models.CharField(max_length=10, null=True) # 性别
+    school = models.CharField(max_length=100, null=True)
     def __str__(self):
         return '\n\t'+'user: ' + self.screen_name + '\n\t'+'id: '+str(self.id)+'\n\t'\
                + '昵称:'+self.screen_name + '\n\t'+'微博数:'+str(self.mblogNum)+'\n\t'+'关注:'+str(self.attNum)
@@ -88,7 +88,7 @@ class Weibo(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
     user = models.ForeignKey(WeiboUser)
     text = models.TextField(null=False)
-    created_timestamp = models.IntegerField(null=True)
+    created_timestamp = models.CharField(max_length=20, null=True)
     retweented_status = models.ForeignKey('self', null=True)
     source = models.CharField(max_length=200, null=True)
 

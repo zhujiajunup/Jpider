@@ -84,6 +84,12 @@ DATABASES = {
         'HOST': '127.0.0.1',
         'PASSWORD': '111111',
         'PORT': 3306,
+        # 在处理包含emoji微博的时候，可能会出错
+        # 想去看下字符编码
+        # use spider;
+        # show variables like 'character_set_database'；
+        # 修改字段字符编码
+        # alter table spiders_weibo modify text longtext charset utf8mb4 collate utf8mb4_unicode_ci;
         'OPTIONS': {'charset': 'utf8mb4'},
     }
 }
