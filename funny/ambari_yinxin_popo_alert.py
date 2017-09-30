@@ -6,7 +6,7 @@ import sys
 import requests
 import ConfigParser
 
-netease_alert_url = 'https://master.mail.netease.com/omnew/alert/sendMultiAlert'
+netease_alert_url = 'https://xxxx/omnew/alert/sendMultiAlert'
 conf_path = './alert.conf'
 
 
