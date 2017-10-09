@@ -31,7 +31,7 @@ def send_email(subject, msg):
     e = Email()
     e.content_from = 'jjzhu_ncu@163.com'
     e.content_to = '767543579@qq.com'
-    e.content_pwd = 'vs7452014'
+    e.content_pwd = 'xxxx'
     e.content_subject = 'hello world'
     e.content_msg = 'hello word'
     e.send_163()

@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.utils.translation import ugettext_lazy as _
+import datetime
 # Create your models here.
 
 
@@ -9,7 +10,7 @@ class ShopId(models.Model):
 
 
 class BaiKeRank(models.Model):
-    rank = models.IntegerField(max_length=20, null=True)
+    rank = models.IntegerField(null=True)
     name = models.CharField(max_length=50, null=True)
     ori_score = models.CharField(max_length=50, null=True)
     rank_time = models.CharField(max_length=20)
@@ -64,8 +65,8 @@ class WeiboUser(models.Model):
     mblogNum = models.CharField(max_length=20, null=True)  # 微博数
     attNum = models.CharField(max_length=20, null=True)  # 关注数
     fansNum = models.CharField(max_length=20, null=True)  # 粉丝数
-    gender = models.IntegerField(choices=enumerate(GENDER), null=True)  # 性别
-
+    gender = models.CharField(max_length=10, null=True) # 性别
+    school = models.CharField(max_length=100, null=True)
     def __str__(self):
         return '\n\t'+'user: ' + self.screen_name + '\n\t'+'id: '+str(self.id)+'\n\t'\
                + '昵称:'+self.screen_name + '\n\t'+'微博数:'+str(self.mblogNum)+'\n\t'+'关注:'+str(self.attNum)
@@ -87,7 +88,7 @@ class Weibo(models.Model):
     id = models.CharField(max_length=20, primary_key=True)
     user = models.ForeignKey(WeiboUser)
     text = models.TextField(null=False)
-    created_timestamp = models.IntegerField(null=True)
+    created_timestamp = models.CharField(max_length=20, null=True)
     retweented_status = models.ForeignKey('self', null=True)
     source = models.CharField(max_length=200, null=True)
 
@@ -95,19 +96,24 @@ class Weibo(models.Model):
         return '\n\t'+'user:'+self.user.screen_name+'\n\t'+'blog_id:'+self.id
 
 
-class BilibiliMovie(models.Model):
-    id = models.IntegerField(primary_key=True)
-    arcurl = models.URLField()
-    author = models.CharField(max_length=255)
-    description = models.TextField()
-    favorites = models.CharField(max_length=100)
-    video_review = models.CharField(max_length=100)
-    play = models.CharField(max_length=100)
-    title = models.CharField(max_length=255)
-    tag = models.CharField(max_length=255)
+class Comment(models.Model):
+    name = models.CharField(_('name'), max_length=64)
+    email_address = models.EmailField(_('email address'))
+    homepage = models.URLField(_('home page'), blank=True)
+    comment = models.TextField(_('comment'))
+    pub_date = models.DateTimeField(_('Published date'), editable=False, auto_now_add=True)
+    is_spam = models.BooleanField(_('spam?'), default=False, editable=False)
+
+    class Meta:
+        verbose_name = _('comment')
+        verbose_name_plural = _('comment')
+
+
+class Step(models.Model):
+    steps = models.IntegerField()
+    curr_time = models.DateTimeField(default=datetime.datetime.now())
 
     def __str__(self):
-        return "id:%d\ttitle:%s\t播放量:%s\t收藏数:%d\t评论数:%d" % \
-               (self.id, self.title, self.play, self.favorites, self.video_review)
+        return '{steps:%d, time:%s}' % (self.steps, self.curr_time.strftime('%Y-%m-%d %H:%M:%S'))
 
 

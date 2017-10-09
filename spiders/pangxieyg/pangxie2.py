@@ -233,19 +233,19 @@ def monitor(good_id):
         else:
             with open('./record/%s_%s.txt' % (good_id, datetime.datetime.now().strftime('%Y-%m-%d')), 'a') as f:
                 f.write('%s\t%s\t有货啦\n' % (datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), good_name))
-                f.flush()
+
             if good_id in ordered:
 
                 LOGGER.info(u"%s[%s] 有货，已下单" % (good_name, good_id))
 
             else:
                 LOGGER.info(u'buy step2:%s[%s]' % (good_name, good_id))
-                buy_step2(rsp_json, cookies, good_id)
-                LOGGER.info(u'%s[%s]购买成功了，快到订单界面付款吧！！！！' % (good_name, good_id))
+                # buy_step2(rsp_json, cookies, good_id)
+                # LOGGER.info(u'%s[%s]购买成功了，快到订单界面付款吧！！！！' % (good_name, good_id))
                 with ordered_lock:
                     ordered.add(good_id)
-                send_email2(u'【螃蟹云购】下单成功啦', u'下单用户：%s\n商品名：%s\n商品id:%s\n商品链接:%s\n' %
-                            (username, good_name, good_id, good_detail_page_url % good_id), receives)
+                send_email2(u'【螃蟹云购】有库存啦', u'商品名：%s\n商品id:%s\n商品链接:%s\n' %
+                            (good_name, good_id, good_detail_page_url % good_id), receives)
                 notify()
     except Exception as e:
 
