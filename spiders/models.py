@@ -94,3 +94,20 @@ class Weibo(models.Model):
     def __str__(self):
         return '\n\t'+'user:'+self.user.screen_name+'\n\t'+'blog_id:'+self.id
 
+
+class BilibiliMovie(models.Model):
+    id = models.IntegerField(primary_key=True)
+    arcurl = models.URLField()
+    author = models.CharField(max_length=255)
+    description = models.TextField()
+    favorites = models.CharField(max_length=100)
+    video_review = models.CharField(max_length=100)
+    play = models.CharField(max_length=100)
+    title = models.CharField(max_length=255)
+    tag = models.CharField(max_length=255)
+
+    def __str__(self):
+        return "id:%d\ttitle:%s\t播放量:%s\t收藏数:%d\t评论数:%d" % \
+               (self.id, self.title, self.play, self.favorites, self.video_review)
+
+
