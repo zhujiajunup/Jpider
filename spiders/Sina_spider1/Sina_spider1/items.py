@@ -47,6 +47,7 @@ class TweetsItem(Item):
     Like = Field()  # 点赞数
     Comment = Field()  # 评论数
     Transfer = Field()  # 转载数
+    Type = Field()  # 类型 转发|原创|点赞
 
     def __str__(self):
         return '--------------------------------------------------------------------------\n' \
