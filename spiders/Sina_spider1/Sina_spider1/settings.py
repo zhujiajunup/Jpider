@@ -1,4 +1,9 @@
 # encoding=utf-8
+import yaml
+import os
+print os.path.split(os.path.realpath(__file__))[0]
+PROPERTIES = yaml.load(open(os.path.split(os.path.realpath(__file__))[0] + '/conf/weibo.yaml'))
+
 BOT_NAME = 'Sina_spider1'
 
 SPIDER_MODULES = ['Sina_spider1.spiders']

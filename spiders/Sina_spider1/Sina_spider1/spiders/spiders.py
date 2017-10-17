@@ -6,6 +6,7 @@ from scrapy.selector import Selector
 from scrapy.http import Request
 from Sina_spider1.items import InformationItem, TweetsItem, FollowsItem, FansItem, CommentItem, FlagItem
 from Sina_spider1.constant import *
+from Sina_spider1.settings import PROPERTIES
 import ssl
 import json
 
@@ -15,9 +16,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 class Spider(CrawlSpider):
     name = "sinaSpider"
     host = "https://weibo.cn"
-    start_urls = [
-        2210643391
-    ]
+    start_urls = PROPERTIES['users']
     scrawl_ID = set(start_urls)  # 记录待爬的微博ID
     finish_ID = set()  # 记录已爬的微博ID
     comment_pattern = 'https://weibo.cn/comment/%s?page=%d'
