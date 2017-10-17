@@ -26,13 +26,6 @@ logger = logging.getLogger(__name__)
 logging.getLogger("selenium").setLevel(logging.WARNING)  # 将selenium的日志级别设成WARNING，太烦人
 
 
-myWeiBo = [
-    {'no': '767543579@qq.com', 'psw': 'JOPPER'},
-    # {'no': 'shudieful3618@163.com', 'psw': 'a123456'},
-    {'no': 'jjzhu_ncu@163.com', 'psw': 'jvs7452014'},
-    {'no': 'jjzhu_zju@163.com', 'psw': 'jvs7452014'},
-]
-
 def getCookie(account, password):
     if COOKIE_GETWAY == 0:
         return get_cookie_from_login_sina_com_cn(account, password)
