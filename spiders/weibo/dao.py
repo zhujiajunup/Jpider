@@ -63,6 +63,7 @@ def save_user_info( user_info):
     LOGGER.info(user)
     return user
 
+
 def save_relationship(user, fan):
     try:
         r = UserRelationship.objects.get(Q(user=user) & Q(follower=fan))
@@ -75,11 +76,14 @@ def save_relationship(user, fan):
         LOGGER.info(relation)
         relation.save()
 
+
 def insert_pic_info(self, pic_info):
     pass
 
+
 def insert_comment_info(self, comment_info):
     pass
+
 
 def save_pic(self):
     url = 'http://ww2.sinaimg.cn/large/c0788b86jw1f2xfstebzaj20dc0hst9r.jpg'

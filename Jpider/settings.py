@@ -82,7 +82,7 @@ DATABASES = {
         'NAME': 'spider',
         'USER': 'root',
         'HOST': '127.0.0.1',
-        'PASSWORD': '111111',
+        'PASSWORD': '1111',
         'PORT': 3306,
         # 在处理包含emoji微博的时候，可能会出错
         # 想去看下字符编码

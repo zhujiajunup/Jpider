@@ -1,15 +1,14 @@
 from spiders.logger import LOGGER
-from spiders import user_agent
 from spiders.weibo import constants
 
 import traceback
 import random
-
+import json
 import http.cookiejar
 import urllib.parse
 import urllib.request
 from time import sleep
-import threading
+import ssl
 
 
 def login(user_name, password, opener):
@@ -35,16 +34,22 @@ def login(user_name, password, opener):
     try_time = 0
     while try_time < constants.TRY_TIME:
         try:
-            opener.open(constants.LOGIN_URL, post_data)
-
-            LOGGER.info("login successful" + ', thread name:' + threading.current_thread().getName())
-            sleep(1)
-            break
+            resp = opener.open(constants.LOGIN_URL, post_data)
+            resp_json = json.loads(resp.read().decode())
+            if 'retcode' in resp_json and resp_json['retcode'] == 20000000:
+                LOGGER.info("%s login successful" % user_name)
+                break
+            else:
+                LOGGER.warn('login fail:%s' % str(resp_json))
+                sleep(10)
+                try_time += 1
         except :
             LOGGER.error("login failed")
             LOGGER.error(traceback.print_exc())
+            sleep(10)
             try_time += 1
             LOGGER.info('try %d time' % try_time)
+
 
 
 def get_openner():
@@ -63,7 +68,7 @@ def change_header(opener, ext=None):
         'Accept-Language': 'zh-CN,zh;q=0.8,en;q=0.6',
         'Host': 'm.weibo.cn',
         'Proxy-Connection': 'keep-alive',
-        'User-Agent': user_agent.agents[random.randint(0, len(user_agent.agents) - 1)]
+        'User-Agent': constants.USER_AGENTS[random.randint(0, len(constants.USER_AGENTS) - 1)]
     }
     if ext:
         head.update(ext)
@@ -74,7 +79,7 @@ def change_header(opener, ext=None):
     opener.addheaders = header
 
 
-def change_proxy( opener):
+def change_proxy(opener):
     proxy_handler = urllib.request.ProxyHandler(constants.PROXIES[random.randint(0, len(constants.PROXIES) -1)])
     opener.add_handler(proxy_handler)
 
@@ -99,7 +104,7 @@ def make_my_opener():
         'Origin': 'https://passport.weibo.cn',
         'Referer': 'https://passport.weibo.cn/signin/login?'
                    'entry=mweibo&res=wel&wm=3349&r=http%3A%2F%2Fm.weibo.cn%2F',
-        'User-Agent': user_agent.agents[random.randint(0, len(user_agent.agents) - 1)]
+        'User-Agent': constants.USER_AGENTS[random.randint(0, len(constants.USER_AGENTS) - 1)]
     }
     for key, value in head.items():
         elem = (key, value)

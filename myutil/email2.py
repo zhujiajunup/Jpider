@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 
 SERVER = 'smtp.163.com'
 FROM = 'jjzhu_ncu@163.com'
-TO = ['767543579@qq.com']
+TO = ['jjzhu_zju@163.com']
 
 SUBJECT = u'测试UTF8编码'
 TEXT = u'ABCDEFG一二三四五六七'
@@ -20,6 +20,6 @@ part = MIMEText(TEXT, 'plain', 'utf-8')
 msg.attach(part)
 
 server = smtplib.SMTP(SERVER, port=25)
-server.login(FROM, 'vs7452014')
+server.login(FROM, 'jvs7452014')
 server.sendmail(FROM, TO, msg.as_string().encode('ascii'))
 server.quit()

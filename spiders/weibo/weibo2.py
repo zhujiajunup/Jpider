@@ -20,6 +20,7 @@ from spiders.weibo import dao
 from spiders.weibo import weibo_http
 from spiders.weibo import constants
 
+
 class WeiboCrawler:
 
     def __init__(self, user, password):
@@ -42,7 +43,6 @@ class WeiboCrawler:
         self.follower_set_lock = Lock()
         self.logger = logger.LOGGER
         self.init_thread()  # 开启进程
-
 
     def init_thread(self):
         self.logger.info('init  threads: %d' % constants.THREAD_NUM)
@@ -107,7 +107,7 @@ class WeiboCrawler:
                 time = constants.SLEEP_TIME[random.randint(0, len(constants.SLEEP_TIME) - 1)]
                 self.logger.info('sleep time:%d seconds' % time)
                 sleep(time)
-            except: # 可以细化
+            except:  # 可以细化
                 self.logger.error(traceback.print_exc())
                 sleep(1 * 60)
 
@@ -137,7 +137,7 @@ class WeiboCrawler:
         return_json = json.loads(rsp_data)
         for card in return_json['cards']:
             for item in filter(lambda i: 'item_name' in i, card['card_group']):
-                print(item)
+
                 if item['item_name'] in constants.USER_INFO_MAP:
                     setattr(user, constants.USER_INFO_MAP[item['item_name']], item['item_content'])
 
@@ -160,18 +160,16 @@ class WeiboCrawler:
             resp = opener.open(constants.FANS_URL_PATTERN % (user_id, user_id, str(page)))
             self.logger.info(constants.FANS_URL_PATTERN % (user_id, user_id, str(page)))
             r = resp.read()
-            print(r)
+
             resp_json = json.loads(r.decode())
             if 'msg' in resp_json:
                 break
             for card in resp_json['cards']:
                 for cg in card['card_group']:
-                    print(cg['user'])
+
                     fan = dao.save_user_info(cg['user'])
                     dao.save_relationship(user, fan)
                     self.id_enqueue(fan.id, self.user_set_lock, self.CRAWLED_USERS, self.user_queue)
-
-            print(resp_json)
             page += 1
 
     def grab_user_follower(self, user_id):
@@ -190,8 +188,6 @@ class WeiboCrawler:
             for card in resp_json['cards']:
 
                 for cg in filter(lambda c: 'user' in c, card['card_group']):
-                    print(cg)
-                    print(cg['user'])
                     follower = dao.save_user_info(cg['user'])
                     dao.save_relationship(follower, user)
                     self.id_enqueue(follower.id, self.user_set_lock, self.CRAWLED_USERS, self.user_queue)
@@ -217,7 +213,7 @@ class WeiboCrawler:
                 max_page = int(int(total)/9)
                 has_get_pages = True
 
-            print('-'*16+"\n"+str(cards))
+            # print('-'*16+"\n"+str(cards))
             for card in filter(lambda c: 'mblog' in c and 'msg' not in c, cards):
                 blog_info = card['mblog']
                 weibo = dao.save_blog_info(blog_info)
@@ -247,25 +243,26 @@ class WeiboCrawler:
         self.logger.info(url)
         rsp = opener.open(url)
         rsp_data = rsp.read().decode()
-        print(rsp_data)
         return_json = json.loads(rsp_data)
         card = return_json['cards'][0]
         user = dao.save_user_info(card['mblog']['user'])
         # self.weibo_enqueue(user.id)
         return user
 
-
     def relogin(self, opener):
-        print(constants.USERS[self.CURR_USER_INDEX]['username']+" logout")
+        """
+        還未用到
+        :param opener: 
+        :return: 
+        """
         opener.open('http://m.weibo.cn/home/logout')  # 登出
-        print('logout successful')
         curr_index = random.randint(0, len(constants.USERS)-1)
         while curr_index == self.CURR_USER_INDEX:
             curr_index = random.randint(0, len(constants.USERS)-1)
         self.CURR_USER_INDEX = curr_index
         print(constants.USERS[self.CURR_USER_INDEX]['username'] + " login")
         weibo_http.login(constants.USERS[self.CURR_USER_INDEX]['username'],
-                         constants.USERS[self.CURR_USER_INDEX]['password'])
+                         constants.USERS[self.CURR_USER_INDEX]['password'], opener)
         weibo_http.change_header(opener)
 
 

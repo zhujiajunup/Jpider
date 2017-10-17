@@ -1,6 +1,7 @@
 import smtplib
 import email.mime.multipart
 import email.mime.text
+# -*- coding:utf-8 -*-
 
 
 class Email(object):
@@ -18,7 +19,7 @@ class Email(object):
         msg['from'] = self.content_from
         msg['to'] = self.content_to
         msg['subject'] = self.content_subject
-        txt = email.mime.text.MIMEText(self.content_msg, 'plain', 'utf-8')
+        txt = email.mime.text.MIMEText(self.content_msg,  'plain', 'utf-8')
         msg.attach(txt)
         smtp = smtplib.SMTP(host='smtp.163.com', port=25)
 
@@ -30,11 +31,8 @@ class Email(object):
 def send_email(subject, msg):
     e = Email()
     e.content_from = 'jjzhu_ncu@163.com'
-    e.content_to = '767543579@qq.com'
-    e.content_pwd = 'xxxx'
+    e.content_to = 'jjzhu_zju@163.com'
+    e.content_pwd = 'jvs7452014'
     e.content_subject = 'hello world'
     e.content_msg = 'hello word'
     e.send_163()
-
-if __name__ == '__main__':
-    send_email('', '')
