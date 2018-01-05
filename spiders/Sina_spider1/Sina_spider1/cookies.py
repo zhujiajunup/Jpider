@@ -17,7 +17,7 @@ sys.setdefaultencoding('utf8')
 IDENTIFY = 1  # 验证码输入方式:        1:看截图aa.png，手动输入     2:云打码
 # 0 代表从https://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.18) 获取cookie
 # 1 代表从https://weibo.cn/login/获取Cookie
-COOKIE_GETWAY = 1
+COOKIE_GETWAY = 0
 dcap = dict(DesiredCapabilities.PHANTOMJS)  # PhantomJS需要使用老版手机的user-agent，不然验证码会无法通过
 dcap["phantomjs.page.settings.userAgent"] = (
     "Mozilla/5.0 (Linux; U; Android 2.3.6; en-us; Nexus S Build/GRK39F) AppleWebKit/533.1 (KHTML, like Gecko) Version/4.0 Mobile Safari/533.1"
@@ -82,7 +82,7 @@ def get_cookie_from_weibo_cn(account, password):
         while "微博" in browser.title and failure < 5:
             failure += 1
             browser.save_screenshot("aa.png")
-
+            print browser.w3c
             username = browser.find_element_by_id("loginName")
             username.clear()
             username.send_keys(account)
@@ -105,6 +105,7 @@ def get_cookie_from_weibo_cn(account, password):
                     code_txt = identify()  # 验证码打码平台识别
                 code.send_keys(code_txt)
             except NoSuchElementException, e:
+                print e
                 pass
 
             commit = browser.find_element_by_id("loginAction")
@@ -144,8 +145,10 @@ def getCookies(weibo):
         password = elem['password']
         print account, password
         cookie = getCookie(account, password)
-        if cookie is not None:
+        if cookie is not None and cookie != '':
+            print '-' * 10
             print cookie
+            print '-' * 10
             if isinstance(cookie, str):
                 cookies.append(eval(cookie))
             elif isinstance(cookie, dict):

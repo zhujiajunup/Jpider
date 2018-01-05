@@ -1,6 +1,7 @@
 # encoding=utf-8
 import yaml
 import os
+import scrapy.core.scraper
 print os.path.split(os.path.realpath(__file__))[0]
 PROPERTIES = yaml.load(open(os.path.split(os.path.realpath(__file__))[0] + '/conf/weibo.yaml'))
 
@@ -12,6 +13,7 @@ NEWSPIDER_MODULE = 'Sina_spider1.spiders'
 DOWNLOADER_MIDDLEWARES = {
     "Sina_spider1.middleware.UserAgentMiddleware": 401,
     "Sina_spider1.middleware.CookiesMiddleware": 402,
+    'Sina_spider1.middleware.RefererMiddleware': 403,
 }
 
 ITEM_PIPELINES = {

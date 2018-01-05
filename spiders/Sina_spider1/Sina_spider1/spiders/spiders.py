@@ -16,14 +16,27 @@ ssl._create_default_https_context = ssl._create_unverified_context
 class Spider(CrawlSpider):
     name = "sinaSpider"
     host = "https://weibo.cn"
-    start_urls = PROPERTIES['users']
+    start_urls = []  # PROPERTIES['users'] if PROPERTIES['users'] is not None else []
+    weibos = []  # PROPERTIES['weibos'] if PROPERTIES['weibos'] is not None else []
     scrawl_ID = set(start_urls)  # 记录待爬的微博ID
     finish_ID = set()  # 记录已爬的微博ID
     comment_pattern = 'https://weibo.cn/comment/%s?page=%d'
     like_pattern = "https://m.weibo.cn/api/container/getSecond?" \
                    "containerid=100505%s_-_WEIBO_SECOND_PROFILE_LIKE_WEIBO&page=%d"
+    tweets_pattern = "https://weibo.cn/%s/profile?page=%d"
+    default_headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Accept-Language': 'zh-CN,zh;q=0.8',
+        'Cache-Control': 'max-age=0',
+        'Connection': 'keep-alive',
+        'Host': 'weibo.cn',
+        'Upgrade-Insecure-Requests': '1',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
+    }
 
     def start_requests(self):
+        yield Request(url="https://weibo.com/47452014", )
         while self.scrawl_ID.__len__():
             ID = self.scrawl_ID.pop()
             self.finish_ID.add(ID)  # 加入已爬队列
@@ -40,24 +53,29 @@ class Spider(CrawlSpider):
             url_follows = "https://weibo.cn/2210643391/follow"  # url_follows = "http://weibo.cn
             like_url = self.like_pattern % (ID, 1)
             url_fans = "http://weibo.cn/%s/fans" % ID
-            url_tweets = "http://weibo.cn/%s?page=1" % ID
+            # url_tweets = "http://weibo.cn/%s/profile?page=1" % ID
             url_information0 = "http://weibo.cn/attgroup/opening?uid=%s" % ID
-            weibo_id = 'FniYTADUE'
+
             meta_data = {"id": ID, "current_page": 1}
             # yield Request(url=url_follows, meta={"item": followsItems, "result": follows},
             #             callback=self.parse3)  # 去爬关注人
             # yield Request(url=url_fans, meta={"item": fansItems, "result": fans}, callback=self.parse3)  # 去爬粉丝
             # yield Request(url=url_information0, meta={"ID": ID}, callback=self.parse0)  # 去爬个人信息
-            # yield Request(url=url_tweets, meta={"ID": ID, "current_page": 1}, callback=self.parse_weibo)  # 去爬微博
-            yield Request(url=like_url, meta=meta_data, callback=self.parse_weibo2)
+            yield Request(url=self.tweets_pattern % (ID, 1), meta={"ID": ID, "current_page": 1},
+                          dont_filter=True,
+                          callback=self.parse_weibo,
+                          headers=self.default_headers)  # 去爬微博
+            # yield Request(url=like_url, meta=meta_data, callback=self.parse_weibo2)
             # yield Request(url=comment_url, meta={"weiboId": weibo_id}, callback=self.parse_comment)
+        for weibo in self.weibos:
+            yield Request(url=self.comment_pattern % (weibo, 1), meta={"weiboId": weibo, "current_page": 1},
+                          dont_filter=True, callback=self.parse_comment, headers=self.default_headers)
 
-    def parse_comment(self, response):
-
+    def parse_comment2(self, response):
         weiboId = response.meta['weiboId']
         selector = Selector(response)
         comments = selector.xpath('body/div[@class="c" and starts-with(@id, "C_")]')
-        current_page = response.meta['current_page']
+
         for c in comments:
             commentItem = CommentItem()
             commentItem['weibo_id'] = weiboId
@@ -75,28 +93,18 @@ class Spider(CrawlSpider):
                 if len(others) == 2:
                     commentItem["source"] = others[1]
             yield commentItem
-        # print selector.xpath(u'body/div[@id="pagelist"]/form').extract_first()
-        next_page_url = selector.xpath(u'body/div[@id="pagelist"]/form/div/a[text()="下页"]/@href').extract_first()
-        next_page = current_page + 1
-        if 'max_page' not in response.meta:
-            # print selector.xpath('body/div[@id="pagelist"]')
-            max_page = selector.xpath('body/div[@id="pagelist"]/form/div/input[@name="mp"]/@value').extract_first()
-            if max_page:
-                response.meta['max_page'] = int(max_page)
-            else:
-                flag_item = FlagItem()
-                flag_item['weibo_id'] = weiboId
-                yield flag_item
-                return
-        if next_page < response.meta['max_page']:
-            response.meta['current_page'] = next_page
-            # print "next page" + str(next_page)
-            yield Request(url=self.comment_pattern % (weiboId, next_page), meta=response.meta,
-                          callback=self.parse_comment)
-        else:
-            flag_item = FlagItem()
-            flag_item['weibo_id'] = weiboId
-            yield flag_item
+
+    def parse_comment(self, response):
+
+        weiboId = response.meta['weiboId']
+        selector = Selector(response)
+        max_page = selector.xpath('body/div[@id="pagelist"]/form/div/input[@name="mp"]/@value').extract_first()
+        for page in range(1, int(max_page), 1):
+            if page != 1:
+                self.default_headers['Referer'] = self.comment_pattern % (weiboId, page-1)
+
+            yield Request(url=self.comment_pattern % (weiboId, page), meta=response.meta,
+                          callback=self.parse_comment2, headers=self.default_headers)
 
     def parse0(self, response):
         """ 抓取个人信息1 """
@@ -174,8 +182,7 @@ class Spider(CrawlSpider):
                           meta=response.meta, callback=self.parse_weibo2)
         pass
 
-    def parse_weibo(self, response):
-        """ 抓取微博数据 """
+    def parse_weibo1(self, response):
         selector = Selector(response)
         tweets = selector.xpath('body/div[@class="c" and @id]')
         for tweet in tweets:
@@ -183,20 +190,23 @@ class Spider(CrawlSpider):
             weibo_id = tweet.xpath('@id').extract_first()[2:]  # 微博ID
             cmts = tweet.xpath('div/span[@class="cmt"]').extract()
             if len(tweet.xpath('div/span[@class="cmt"]').extract()) > 2:
-                content = tweet.xpath(u'div/span[text() = "转发理由:"]/../text()').extract_first()
+                r = tweet.xpath(u'div/span[text() = "转发理由:"]')
+                content = r.xpath('./../text()').extract_first()
+                like = re.findall(u'\u8d5e\[(\d+)\]', ','.join(r.xpath(u'./../a/text()').extract()))  # 点赞数
+                transfer = re.findall(u'\u8f6c\u53d1\[(\d+)\]', ','.join(r.xpath(u'./../a/text()').extract()))  # 转载数
+                comment = re.findall(u'\u8bc4\u8bba\[(\d+)\]', ','.join(r.xpath(u'./../a/text()').extract()))  # 评论数
                 tweetsItem['Type'] = REPOST
                 coordinates = None
             else:
                 content = tweet.xpath('div/span[@class="ctt"]/text()').extract_first()  # 微博内容
                 coordinates = tweet.xpath('div/a/@href').extract_first()  # 定位坐标
                 tweetsItem['Type'] = ORIGINAL
-            like = re.findall(u'\u8d5e\[(\d+)\]', tweet.extract())  # 点赞数
-            transfer = re.findall(u'\u8f6c\u53d1\[(\d+)\]', tweet.extract())  # 转载数
-            comment = re.findall(u'\u8bc4\u8bba\[(\d+)\]', tweet.extract())  # 评论数
+                like = re.findall(u'\u8d5e\[(\d+)\]', tweet.extract())  # 点赞数
+                transfer = re.findall(u'\u8f6c\u53d1\[(\d+)\]', tweet.extract())  # 转载数
+                comment = re.findall(u'\u8bc4\u8bba\[(\d+)\]', tweet.extract())  # 评论数
             others = tweet.xpath('div/span[@class="ct"]/text()').extract_first()  # 求时间和使用工具（手机或平台）
 
             tweetsItem["ID"] = response.meta["ID"]
-            comment_url = self.comment_pattern % (weibo_id, 1)
 
             tweetsItem["_id"] = response.meta["ID"] + "-" + weibo_id
             if content:
@@ -217,21 +227,20 @@ class Spider(CrawlSpider):
                 if len(others) == 2:
                     tweetsItem["Tools"] = others[1]
 
-            yield Request(url=comment_url, meta={"weiboId": weibo_id, "current_page": 1}, callback=self.parse_comment)
+            # yield Request(url=comment_url, meta={"weiboId": weibo_id, "current_page": 1}, callback=self.parse_comment)
             yield tweetsItem
-        next_page = response.meta['current_page'] + 1
-        if 'max_page' not in response.meta:
-            print selector.xpath('body/div[@id="pagelist"]')
-            max_page = selector.xpath('body/div[@id="pagelist"]/form/div/input[@name="mp"]/@value').extract_first()
-            if max_page:
-                response.meta['max_page'] = int(max_page)
-            else:
-                return
-        print response.meta['max_page']
-        if next_page <= response.meta['max_page']:
-            response.meta['current_page'] = next_page
-            yield Request(url=self.host + '/' + response.meta['ID'] + '?page=' + str(next_page),
-                          meta=response.meta, callback=self.parse_weibo)
+
+    def parse_weibo(self, response):
+        """ 抓取微博数据 """
+        selector = Selector(response)
+        max_page = selector.xpath('body/div[@id="pagelist"]/form/div/input[@name="mp"]/@value').extract_first()
+        if max_page:
+            for page in range(1, int(max_page)):
+                yield Request(url=self.tweets_pattern % (response.meta['ID'], page),
+                              meta=response.meta, callback=self.parse_weibo1)
+        else:
+            return
+
 
     def parse3(self, response):
         """ 抓取关注或粉丝 """

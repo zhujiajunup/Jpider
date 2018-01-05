@@ -9,20 +9,30 @@ class FilePipeline(object):
     def process_item(self, item, spider):
 
         if isinstance(item, CommentItem):
+            path = './' + item['weibo_id']
+            if not os.path.exists(path):
+                os.makedirs(path)
+                f = open(path + '/' + item['weibo_id'] + '.txt', 'a')
+                self.FILE_CACHE[item['weibo_id']] = f
             f = self.FILE_CACHE[item['weibo_id']]
-            f.write('%s\t%s\t%s\t%s\n' % (item['user'], item['content'], item['source'] if 'source' in item else '', item['time']))
+            f.write('%s\t%s\t%s\t%s\n' % (
+            item['user'], item['content'], item['source'] if 'source' in item else '', item['time']))
         if isinstance(item, TweetsItem):
             path = './' + item['ID']
             if not os.path.exists(path):
                 os.makedirs(path)
-            f = open(path + '/' + item['_id'].split('-')[1]+'.txt', 'a')
-            self.FILE_CACHE[item['_id'].split('-')[1]] = f
-            f.write('%s\t%s\t%s\t%s\t%s\t%s\n' % (item['Content'], item['PubTime'], item['Tools'],
-                                                  item['Comment'], item['Like'], item['Transfer']))
+            if item['ID'] not in self.FILE_CACHE:
+                f = open(path + '/' + item['ID'] + '.txt', 'a')
+                self.FILE_CACHE[item['ID']] = f
+            f = self.FILE_CACHE[item['ID']]
+            f.write('%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (item['_id'], item['Content'], item['PubTime'], item['Tools'] if 'Tools' in item else '',
+                                                      item['Comment'], item['Like'], item['Transfer']))
+            f.flush()
         if isinstance(item, FlagItem):
             f = self.FILE_CACHE[item['weibo_id']]
             f.close()
             del self.FILE_CACHE[item['weibo_id']]
+
 # class MongoDBPipeline(object):
 #     def __init__(self):
 #         clinet = pymongo.MongoClient("localhost", 27017)
